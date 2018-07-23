@@ -59,16 +59,22 @@ public class ControlPC : MonoBehaviour
     public float gravity = 1;
     [HideInInspector]
     public float appliedGravity;
+    LayerMask terrainLayermask;
 
     // Camera
     [Header("Camera")]
-    public Transform cameraContianer;
+    public Transform cameraContainer;
     [HideInInspector]
     public Camera cam;
     public float yRotationSpeed = 45;
     public float xRotationSpeed = 45;
     private float yRotation;
     private float xRotation;
+    public float camMinDistance = 1;
+    public float camMaxDistance = 6;
+    public float camLerpSpeed = 3;
+    float currentCamDistance;
+    Vector3 camLerpTarget;
 
     private enum AnimationStates
     {
@@ -94,15 +100,16 @@ public class ControlPC : MonoBehaviour
 
     void Start()
     {
-        cameraContianer.GetChild(0).gameObject.SetActive(true);
-        cam = cameraContianer.GetComponentInChildren<Camera>();
+        cameraContainer.GetChild(0).gameObject.SetActive(true);
+        cam = cameraContainer.GetComponentInChildren<Camera>();
         yRotation = transform.localEulerAngles.y;
-        xRotation = cam.transform.localEulerAngles.x;
+        xRotation = cameraContainer.localEulerAngles.x;
         wasStopped = true;
         appliedGravity = gravity / 2;
         Application.runInBackground = true;
         cc = GetComponent<CharacterController>();
         lastPosition = transform.position;
+        currentCamDistance = cam.transform.position.z;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
@@ -185,7 +192,7 @@ public class ControlPC : MonoBehaviour
 
         if (xRotation != cam.transform.eulerAngles.x || yRotation != transform.eulerAngles.y)
         {
-            cameraContianer.transform.localEulerAngles = new Vector3(xRotation, 0, 0);
+            cameraContainer.transform.localEulerAngles = new Vector3(xRotation, 0, 0);
             transform.localEulerAngles = new Vector3(0, yRotation, 0);
         }
     }
@@ -277,9 +284,8 @@ public class ControlPC : MonoBehaviour
 
     bool CheckForGround()
     {
-        int layermask = 1 << 9;
         RaycastHit hit;
-        if (Physics.SphereCast(transform.position, .5f, Vector3.down, out hit, .6f, layermask))
+        if (Physics.SphereCast(transform.position, .5f, Vector3.down, out hit, .6f, terrainLayermask))
         {
             appliedGravity = gravity / 3;
             isFalling = false;
