@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Huge help from https://github.com/GenaSG/UnityUnetMovement for server-authoritative movement
-/// </summary>
-
 public struct MovementMod
 {
     public MovementMod(Vector3 direction, float startTime, float removeTime, bool fade, bool groundClear, bool gravReset)
